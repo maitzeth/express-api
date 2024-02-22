@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
+import data from './data.json';
 
 dotenv.config();
 
@@ -11,5 +12,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.listen(port, () => {
+  console.log(data);
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });
