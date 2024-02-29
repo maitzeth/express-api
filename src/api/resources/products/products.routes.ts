@@ -1,7 +1,8 @@
-import express, { Express, Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import products from "../../../data.json";
 import { v4 as uuidv4 } from 'uuid';
 import { Product } from '../../../types';
+import { validateProductMiddleware } from './products.validate';
 
 const productsRouter = express.Router();
 
@@ -11,14 +12,10 @@ productsRouter.get('/', (req: Request, res: Response) => {
 });
 
 // Create a new product
-productsRouter.post('/', (req: Request, res: Response) => {
-  const { title, price } = req.body as Product;
+productsRouter.post('/', validateProductMiddleware, (req: Request, res: Response) => {
+  const productBody = req.body as Product;
+  const { price, title } = productBody;
 
-  if (!title || !price) {
-    return res.status(400).json({ message: 'Invalid request body' });
-  }
-
-  // Generate a unique id for this product
   const id = uuidv4();
   const newProduct = { id, title, price } satisfies Product;
 
