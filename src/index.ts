@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 
 import bodyParser from 'body-parser';
 import productsRouter from "./api/resources/products/products.routes";
+import morganMiddleware from "./middleware/morgan.middleware";
+import { logger } from './utils/logger';
 
 dotenv.config();
 
@@ -16,6 +18,8 @@ app.use(
     extended: true,
   }),
 );
+// ⚠️ Add a request logger middleware here
+app.use(morganMiddleware);
 
 app.use('/products', productsRouter);
 
@@ -24,5 +28,5 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+  logger.info(`[server]: Server is running at http://localhost:${port}`);
 });
