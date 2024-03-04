@@ -37,6 +37,8 @@ const transports = [
   new winston.transports.File({
     filename: 'logs/error.log',
     level: 'error',
+    maxsize: 5242880, // 5MB
+    maxFiles: 5,
   }),
   // Allow to print all the error message inside the all.log file
   // (also the error log that are also printed inside the error.log(
