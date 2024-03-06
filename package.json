@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon --exec npx ts-node src/index.ts",
+    "dev": "nodemon --exec npx ts-node -r tsconfig-paths/register src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "maitzeth",
@@ -32,6 +32,7 @@
     "@types/uuid": "^9.0.8",
     "nodemon": "^3.1.0",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3",
     "uuid": "^9.0.1"
   }
