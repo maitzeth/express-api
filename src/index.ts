@@ -6,6 +6,10 @@ import productsRouter from "./api/resources/products/products.routes";
 import morganMiddleware from "./middleware/morgan.middleware";
 import { logger } from './utils/logger';
 
+// Passport Strategy
+import passport from 'passport';
+import { BasicStrategy } from 'passport-http';
+
 dotenv.config();
 
 const app: Express = express();
@@ -21,10 +25,21 @@ app.use(
 // ⚠️ Add a request logger middleware here
 app.use(morganMiddleware);
 
+// Passport Strategy
+passport.use(new BasicStrategy(
+  (username, password, done) => {
+    if (username === 'admin' && password === 'admin') {
+      return done(null, true);
+    }
+    return done(null, false);
+  }
+));
+app.use(passport.initialize());
+
 app.use('/products', productsRouter);
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server");
+app.get("/", passport.authenticate('basic', { session: false }), (req: Request, res: Response) => {
+  res.send("API de vendetusperetos");
 });
 
 app.listen(port, () => {
