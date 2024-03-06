@@ -3,7 +3,15 @@
 This is simply an Express API server featuring some basic routes, middleware, and more. I wanted to refresh my understanding of API and Backend technologies.
 
 # Installation
-`yarn install` to get the dependencies.
+```shell
+  npm install
+  # or
+  yarn install
+```
 
-# Run Dev Server
-`yarn dev` to start a development server
+# Development
+```shell
+npm dev
+  # or
+yarn dev
+```
