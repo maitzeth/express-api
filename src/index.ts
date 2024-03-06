@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 
 import bodyParser from 'body-parser';
 import productsRouter from "@/api/resources/products/products.routes";
+import usersRouter from '@/api/resources/users/users.routes';
+
 import morganMiddleware from "@/middleware/morgan.middleware";
 import { logger } from '@/utils/logger';
 
@@ -37,6 +39,7 @@ passport.use(new BasicStrategy(
 app.use(passport.initialize());
 
 app.use('/products', productsRouter);
+app.use('/users', usersRouter);
 
 app.get("/", passport.authenticate('basic', { session: false }), (req: Request, res: Response) => {
   res.send("API de vendetusperetos");
