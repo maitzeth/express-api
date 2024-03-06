@@ -2,9 +2,9 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 
 import bodyParser from 'body-parser';
-import productsRouter from "./api/resources/products/products.routes";
-import morganMiddleware from "./middleware/morgan.middleware";
-import { logger } from './utils/logger';
+import productsRouter from "@/api/resources/products/products.routes";
+import morganMiddleware from "@/middleware/morgan.middleware";
+import { logger } from '@/utils/logger';
 
 // Passport Strategy
 import passport from 'passport';

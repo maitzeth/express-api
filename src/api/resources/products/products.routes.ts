@@ -1,9 +1,9 @@
-import express, { NextFunction, Request, Response } from "express";
-import products from "../../../data.json";
+import express, { Request, Response } from "express";
+import products from "@/data.json";
 import { v4 as uuidv4 } from 'uuid';
-import { Product } from '../../../types';
+import { Product } from '@/types';
 import { validateProductMiddleware } from './products.validate';
-import { logger } from '../../../utils/logger';
+import { logger } from '@/utils/logger';
 
 const productsRouter = express.Router();
 

@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { Product } from '../../../types';
+import { Product } from '@/types';
 
 import { z } from "zod";
-import { errorHandler } from '../../../utils';
+import { errorHandler } from '@/utils';
 
 // Blueprint
 const pluePrintProduct = z.object({
