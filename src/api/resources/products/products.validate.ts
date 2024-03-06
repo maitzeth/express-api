@@ -5,7 +5,7 @@ import { z } from "zod";
 import { errorHandler } from '@/utils';
 
 // Blueprint
-const pluePrintProduct = z.object({
+const bluePrintProduct = z.object({
   title: z.string({
     required_error: "Title is required",
     invalid_type_error: "Title must be a string",
@@ -22,7 +22,7 @@ const pluePrintProduct = z.object({
 export const validateProductMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const productBody = req.body as Product;
 
-  const result = await pluePrintProduct.safeParseAsync(productBody);
+  const result = await bluePrintProduct.safeParseAsync(productBody);
 
   if (!result.success) {
     const formattedErrors = errorHandler(result.error.issues);
