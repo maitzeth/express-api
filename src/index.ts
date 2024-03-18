@@ -11,6 +11,7 @@ import { logger } from '@/utils/logger';
 // Passport Strategy
 import passport from 'passport';
 import { BasicStrategy } from 'passport-http';
+import passportStrategy from '@/api/libs/auth';
 
 dotenv.config();
 
@@ -28,14 +29,7 @@ app.use(
 app.use(morganMiddleware);
 
 // Passport Strategy
-passport.use(new BasicStrategy(
-  (username, password, done) => {
-    if (username === 'admin' && password === 'admin') {
-      return done(null, true);
-    }
-    return done(null, false);
-  }
-));
+passport.use(new BasicStrategy(passportStrategy));
 app.use(passport.initialize());
 
 app.use('/products', productsRouter);
