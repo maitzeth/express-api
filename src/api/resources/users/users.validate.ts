@@ -10,11 +10,11 @@ const bluePrintUser = z.object({
   username: z.string({
     required_error: "Username is required",
     invalid_type_error: "Username must be a string",
-  }).min(3).max(30).regex(alphanumericRegex),
+  }).min(3, { message: 'Username must be 3 or more characters long' }).max(30).regex(alphanumericRegex),
   password: z.string({
     required_error: "Password is required",
     invalid_type_error: "Password must be a string",
-  }).min(6).max(200),
+  }).min(6, { message: 'Password must be 6 or more characters long' }).max(200),
   email: z.string({
     required_error: "Email is required",
     invalid_type_error: "Email must be a string",
@@ -30,7 +30,7 @@ export const userAuthMiddleware = async (req: Request, res: Response, next: Next
 
   if (!result.success) {
     const formattedErrors = errorHandler(result.error.issues);
-    return res.status(400).json({ message: formattedErrors });
+    return res.status(400).json({ messages: formattedErrors });
   }
 
   return next();

@@ -27,7 +27,7 @@ export const validateProductMiddleware = async (req: Request, res: Response, nex
   if (!result.success) {
     const formattedErrors = errorHandler(result.error.issues);
     
-    return res.status(400).json({ message: formattedErrors });
+    return res.status(400).json({ messages: formattedErrors });
   }
 
   next();

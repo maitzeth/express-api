@@ -33,7 +33,7 @@ productsRouter.get('/:id', (req: Request, res: Response) => {
     return res.status(200).json(product);
   }
 
-  return res.status(404).json({ message: [`Product not found`] });
+  return res.status(404).json({ messages: [`Product not found`] });
 });
 
 // Update the product with the given ID
@@ -67,7 +67,7 @@ productsRouter.delete('/:id', (req: Request, res: Response) => {
 
   if (!deletedProduct) {
     logger.info(`Product not found with id: ${id}`);
-    return res.status(404).json({ message: [`Product not found with id: ${id}`] });
+    return res.status(404).json({ messages: [`Product not found with id: ${id}`] });
   }
 
   res.status(200).json(deletedProduct);

@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 // import products from "@/data.json";
-// import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { AuthUser } from '@/types';
 // import { validateProductMiddleware } from './products.validate';
 import { logger } from '@/utils/logger';
@@ -24,7 +24,7 @@ usersRouter.post('/', userAuthMiddleware, (req: Request, res: Response) => {
   if (userExists) {
     // 409 Conflict
     logger.warn(`User already exists: ${JSON.stringify(newUser)}`);
-    return res.status(409).json({ message: [`User already exists`] });
+    return res.status(409).json({ messages: [`User already exists`] });
   }
 
   // Encrypt password
@@ -32,13 +32,13 @@ usersRouter.post('/', userAuthMiddleware, (req: Request, res: Response) => {
     if (err) {
       // Internal Server Error
       logger.error(`Error hashing password: ${err}`);
-      return res.status(500).json({ message: [`Error creating user`] });
+      return res.status(500).json({ messages: [`Error creating user`] });
     }
 
     const user = { ...newUser, password: hashedPw };
     users.push({
       ...user,
-      id: users.length.toString(),
+      id: uuidv4(),
     });
 
     logger.info(`New user created: ${JSON.stringify(user)}`);
