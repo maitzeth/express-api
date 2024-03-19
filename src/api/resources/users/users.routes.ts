@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { v4 as uuidv4 } from 'uuid';
 import { AuthUser } from '@/types';
 import { logger } from '@/utils/logger';
-import { userAuthMiddleware } from './users.validate';
+import { userAuthMiddleware, loginMiddleware } from './users.validate';
 import { users } from '@/database';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -45,7 +45,7 @@ usersRouter.post('/', userAuthMiddleware, (req: Request, res: Response) => {
   });
 });
 
-usersRouter.post('/login', (req: Request, res: Response) => {
+usersRouter.post('/login', loginMiddleware, (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   const user = users.find((user) => user.username === username);
