@@ -10,10 +10,14 @@ export default (username: string, password: string, done: (error: any, user?: an
 
   const hashedPassword = user.password;
   bcrypt.compare(password, hashedPassword, (err, res) => {
+    if (err) {
+      return done(err);
+    }
+
     if (res) {
       return done(null, user);
-    } else {
-      return done(null, false);
     }
+    
+    return done(null, false);
   });
 }
