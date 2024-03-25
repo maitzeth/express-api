@@ -8,3 +8,7 @@ export function createProduct(product: Product) {
 export function getProducts() {
   return ProductModel.find();
 }
+
+export function getProductById(id: string) {
+  return ProductModel.findById(id);
+}

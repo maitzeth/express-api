@@ -1,22 +1,27 @@
 import express, { Request, Response } from "express";
+import { MongooseError } from 'mongoose';
 import products from "@/data.json";
 import { Product, User } from '@/types';
 import { validateProductMiddleware } from './products.validate';
 import { logger } from '@/utils/logger';
 import { jwtAuth } from '@/api/libs/auth';
-import { createProduct, getProducts } from './products.controller';
-import { MongooseError } from 'mongoose';
+import { createProduct, getProducts, getProductById } from './products.controller';
+import { ERROR_MESSAGES } from '@/utils/constants';
 
 const productsRouter = express.Router();
 
-const withErrorHandling = (handler: (req: Request, res: Response) => Promise<void>) => {
+const withErrorHandling = (
+  handler: (req: Request, res: Response) => Promise<void>,
+  fatalErrorMessage: string = ERROR_MESSAGES.default,
+  useDefaultError: boolean = true,
+) => {
   return async (req: Request, res: Response) => {
     try {
       await handler(req, res);
     } catch (err) {
       const error = err as MongooseError;
-      logger.error(`Error creating product: ${error.message}`);
-      res.status(500).json({ messages: [`Error creating product`] });
+      logger.error(`${fatalErrorMessage}: ${error.message}`);
+      res.status(500).json({ messages: [useDefaultError ? fatalErrorMessage : error.message] });
     }
   };
 };
@@ -25,7 +30,7 @@ const withErrorHandling = (handler: (req: Request, res: Response) => Promise<voi
 productsRouter.get('/', withErrorHandling(async (req: Request, res: Response) => {
   const products = await getProducts()
   res.status(200).json(products);
-}));
+}, 'Error getting products'));
 
 // Create a new product
 productsRouter.post('/', [jwtAuth, validateProductMiddleware], withErrorHandling(async (req: Request, res: Response) => {
@@ -39,22 +44,24 @@ productsRouter.post('/', [jwtAuth, validateProductMiddleware], withErrorHandling
     owner: userRequest.username,
     description,
   } satisfies Product;
+  
   const response = await createProduct(newProduct);
 
   logger.info(`New product created: ${JSON.stringify(newProduct)}`);
   res.status(201).json(response);
-}));
+}, 'Error creating product', false));
 
 // Get the product with the given ID
-productsRouter.get('/:id', (req: Request, res: Response) => {
+productsRouter.get('/:id', async (req: Request, res: Response) => {
   const id = req.params.id;
-  const product = products.find((product) => product.id === id);
 
-  if (product) {
-    return res.status(200).json(product);
+  try {
+    const product = await getProductById(id);
+    res.status(200).json({ product });
+  } catch (err) {
+    logger.error(`Error getting product with id: ${id}`);
+    res.status(404).json({ messages: [`Error getting product with id: ${id}`] });
   }
-
-  return res.status(404).json({ messages: [`Product not found`] });
 });
 
 // Update the product with the given ID
