@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { MongooseError } from 'mongoose';
 import products from "@/data.json";
 import { Product, User } from '@/types';
-import { validateProductMiddleware } from './products.validate';
+import { validateProductMiddleware, validateIdMiddleware } from './products.validate';
 import { logger } from '@/utils/logger';
 import { jwtAuth } from '@/api/libs/auth';
 import { createProduct, getProducts, getProductById } from './products.controller';
@@ -52,17 +52,17 @@ productsRouter.post('/', [jwtAuth, validateProductMiddleware], withErrorHandling
 }, 'Error creating product', false));
 
 // Get the product with the given ID
-productsRouter.get('/:id', async (req: Request, res: Response) => {
+productsRouter.get('/:id', validateIdMiddleware, withErrorHandling(async (req: Request, res: Response) => {
   const id = req.params.id;
 
-  try {
-    const product = await getProductById(id);
-    res.status(200).json({ product });
-  } catch (err) {
-    logger.error(`Error getting product with id: ${id}`);
-    res.status(404).json({ messages: [`Error getting product with id: ${id}`] });
+  const product = await getProductById(id);
+
+  if (product) {
+    res.status(200).json(product);
+  } else {
+    res.status(404).json({ messages: [`Product doesnt exists`] });
   }
-});
+}, 'Error getting product by id', false));
 
 // Update the product with the given ID
 productsRouter.put('/:id', [jwtAuth, validateProductMiddleware], (req: Request, res: Response) => {

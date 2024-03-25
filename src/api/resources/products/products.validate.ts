@@ -37,3 +37,13 @@ export const validateProductMiddleware = async (req: Request, res: Response, nex
 
   next();
 }
+
+export const validateIdMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id;
+
+  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    return res.status(400).json({ messages: ["Invalid ID"] });
+  }
+
+  next();
+};
