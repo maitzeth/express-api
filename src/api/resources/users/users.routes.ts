@@ -66,7 +66,12 @@ usersRouter.post('/login', loginMiddleware, (req: Request, res: Response) => {
 
     if (result) {
       // 200 OK
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
+      const token = jwt.sign(
+        { id: user.id },
+        process.env.JWT_SECRET as string,
+        { expiresIn: process.env.JWT_EXPIRE_TIME as string }
+      );
+
       logger.info(`User logged in: ${username}`);
       return res.status(200).json({ token });
     } else {
