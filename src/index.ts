@@ -1,10 +1,12 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
-
 import bodyParser from 'body-parser';
+
+// Resources
 import productsRouter from "@/api/resources/products/products.routes";
 import usersRouter from '@/api/resources/users/users.routes';
 
+// Logger
 import morganMiddleware from "@/middleware/morgan.middleware";
 import { logger } from '@/utils/logger';
 
@@ -12,7 +14,17 @@ import { logger } from '@/utils/logger';
 import passport from 'passport';
 import { jwtStrategy } from '@/api/libs/auth';
 
+// MongoDB
+import mongoose from 'mongoose';
+
 dotenv.config();
+
+// MongoDB
+mongoose.connect(process.env.MONGO_URI as string);
+mongoose.connection.on('error', (error) => {
+  logger.error(`[server]: MongoDB connection error: ${error}`);
+  process.exit(1);
+});
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
