@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Product } from '@/types';
 
 import { z } from "zod";
-import { errorHandler } from '@/utils';
+import { errorMessagesParser } from '@/utils';
 
 // Blueprint
 const bluePrintProduct = z.object({
@@ -14,9 +14,14 @@ const bluePrintProduct = z.object({
     required_error: "Price is required",
     invalid_type_error: "Price must be a number",
   }).positive(),
+  description: z.string({
+    required_error: "Description is required",
+    invalid_type_error: "Description must be a string",
+  }).max(500),
 }).required({
   title: true,
   price: true,
+  description: true,
 });
 
 export const validateProductMiddleware = async (req: Request, res: Response, next: NextFunction) => {
@@ -25,7 +30,7 @@ export const validateProductMiddleware = async (req: Request, res: Response, nex
   const result = await bluePrintProduct.safeParseAsync(productBody);
 
   if (!result.success) {
-    const formattedErrors = errorHandler(result.error.issues);
+    const formattedErrors = errorMessagesParser(result.error.issues);
     
     return res.status(400).json({ messages: formattedErrors });
   }

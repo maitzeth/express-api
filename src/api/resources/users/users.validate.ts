@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import { z } from "zod";
-import { errorHandler } from '@/utils';
+import { errorMessagesParser } from '@/utils';
 
 const alphanumericRegex = /^[a-zA-Z0-9]+$/;
 
@@ -35,7 +35,7 @@ export const userAuthMiddleware = async (req: Request, res: Response, next: Next
   const result = await bluePrintUser.safeParseAsync(req.body);
 
   if (!result.success) {
-    const formattedErrors = errorHandler(result.error.issues);
+    const formattedErrors = errorMessagesParser(result.error.issues);
     return res.status(400).json({ messages: formattedErrors });
   }
 
@@ -55,7 +55,7 @@ export const loginMiddleware = async (req: Request, res: Response, next: NextFun
   const result = await blueprintLogin.safeParseAsync(req.body);
   
   if(!result.success) {
-    const formattedErrors = errorHandler(result.error.issues);
+    const formattedErrors = errorMessagesParser(result.error.issues);
     return res.status(400).json({ messages: formattedErrors });
   }
 

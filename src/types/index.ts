@@ -1,8 +1,8 @@
 export type Product = {
-  id: string;
   title: string;
   price: number;
   owner: string;
+  description: string;
 };
 
 export type User = {
