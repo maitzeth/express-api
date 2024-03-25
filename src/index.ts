@@ -10,8 +10,7 @@ import { logger } from '@/utils/logger';
 
 // Passport Strategy
 import passport from 'passport';
-import { BasicStrategy } from 'passport-http';
-import passportStrategy from '@/api/libs/auth';
+import { jwtStrategy } from '@/api/libs/auth';
 
 dotenv.config();
 
@@ -29,15 +28,11 @@ app.use(
 app.use(morganMiddleware);
 
 // Passport Strategy
-passport.use(new BasicStrategy(passportStrategy));
+passport.use(jwtStrategy);
 app.use(passport.initialize());
 
 app.use('/products', productsRouter);
 app.use('/users', usersRouter);
-
-app.get("/", passport.authenticate('basic', { session: false }), (req: Request, res: Response) => {
-  res.send("API de vendetusperetos");
-});
 
 app.listen(port, () => {
   logger.info(`[server]: Server is running at http://localhost:${port}`);

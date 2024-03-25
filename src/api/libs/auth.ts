@@ -1,40 +1,31 @@
 import { users } from '@/database'; 
-import bcrypt from 'bcrypt';
-import { Strategy } from 'passport-jwt';
+import dotenv from "dotenv";
+import { ExtractJwt, StrategyOptions, Strategy } from 'passport-jwt';
+import passport from 'passport';
+
 import { logger } from '@/utils/logger';
 
+dotenv.config();
+
 const jwtOptions = {
-  
-}
+  secretOrKey: process.env.JWT_SECRET,
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
+} as StrategyOptions;
 
-const JwtStrategy = new Strategy({}, (jwtPayload, done) => {
+// @ts-ignore
+export const jwtStrategy = new Strategy(jwtOptions, (jwtPayload, done) => {
   const user = users.find((user) => user.id === jwtPayload.id);
-
+  
   if (user) {
-    return done(null, user);
+    logger.info(`User found: Payload: ${JSON.stringify(jwtPayload)}, user: ${JSON.stringify(user)}`);
+    return done(null, {
+      id: user.id,
+      username: user.username,
+    });
   }
 
-  logger.info(`User not found: ${jwtPayload.id}`);
+  logger.info(`User not found: ${JSON.stringify(jwtPayload)}`);
   return done(null, false);
 });
 
-export default (username: string, password: string, done: (error: any, user?: any) => void) => {
-  const user = users.find((user) => user.username === username);
-
-  if (!user) {
-    return done(null, false);
-  }
-
-  const hashedPassword = user.password;
-  bcrypt.compare(password, hashedPassword, (err, res) => {
-    if (err) {
-      return done(err);
-    }
-
-    if (res) {
-      return done(null, user);
-    }
-    
-    return done(null, false);
-  });
-}
+export const jwtAuth = passport.authenticate('jwt', { session: false });

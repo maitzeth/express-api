@@ -14,6 +14,7 @@ usersRouter.get('/', (req: Request, res: Response) => {
   res.json(users);
 });
 
+// Create User
 usersRouter.post('/', userAuthMiddleware, (req: Request, res: Response) => {
   const newUser = req.body as AuthUser;
 
@@ -33,15 +34,14 @@ usersRouter.post('/', userAuthMiddleware, (req: Request, res: Response) => {
       return res.status(500).json({ messages: [`Error creating user`] });
     }
 
-    const user = { ...newUser, password: hashedPw };
+    const user = { ...newUser, password: hashedPw, id: uuidv4() };
 
     users.push({
       ...user,
-      id: uuidv4(),
     });
 
     logger.info(`New user created: ${JSON.stringify(user)}`);
-    res.status(201).json(users);
+    res.status(201).json(user);
   });
 });
 
@@ -66,7 +66,7 @@ usersRouter.post('/login', loginMiddleware, (req: Request, res: Response) => {
 
     if (result) {
       // 200 OK
-      const token = jwt.sign({ username: user.id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
       logger.info(`User logged in: ${username}`);
       return res.status(200).json({ token });
     } else {

@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
 import products from "@/data.json";
 import { v4 as uuidv4 } from 'uuid';
-import { Product } from '@/types';
+import { Product, User } from '@/types';
 import { validateProductMiddleware } from './products.validate';
 import { logger } from '@/utils/logger';
+import { jwtAuth } from '@/api/libs/auth';
 
 const productsRouter = express.Router();
 
@@ -13,12 +14,17 @@ productsRouter.get('/', (req: Request, res: Response) => {
 });
 
 // Create a new product
-productsRouter.post('/', validateProductMiddleware, (req: Request, res: Response) => {
+productsRouter.post('/', [jwtAuth, validateProductMiddleware], (req: Request, res: Response) => {
   const productBody = req.body as Product;
+  const userRequest = req.user as Pick<User, 'id' | 'username'>;
   const { price, title } = productBody;
 
-  const id = uuidv4();
-  const newProduct = { id, title, price } satisfies Product;
+  const newProduct = {
+    id: uuidv4(),
+    title,
+    price,
+    owner: userRequest.username,
+  } satisfies Product;
   // logger the new product
   logger.info(`New product created: ${JSON.stringify(newProduct)}`);
   res.status(201).json([...products, newProduct]);
@@ -37,17 +43,19 @@ productsRouter.get('/:id', (req: Request, res: Response) => {
 });
 
 // Update the product with the given ID
-productsRouter.put('/:id', validateProductMiddleware, (req: Request, res: Response) => {
+productsRouter.put('/:id', [jwtAuth, validateProductMiddleware], (req: Request, res: Response) => {
   const id = req.params.id;
   const { title, price } = req.body as Product;
+  const userRequest = req.user as Pick<User, 'id' | 'username'>;
 
+  // TODO UPDATE THE PRODUCT IF YOU ARE THE OWNER OR RETURN 
   const updatedProducts = products.map((product) => {
-    if (product.id === id) {
+    if (product.id === id && product.owner === userRequest.username) {
       return {
         ...product,
-        ...(title && { title }),
-        ...(price && { price }),
-      };
+        price,
+        title,
+      } satisfies Product;
     }
 
     return product;
@@ -59,8 +67,10 @@ productsRouter.put('/:id', validateProductMiddleware, (req: Request, res: Respon
 });
 
 // Delete the product with the given ID
-productsRouter.delete('/:id', (req: Request, res: Response) => {
+productsRouter.delete('/:id', jwtAuth, (req: Request, res: Response) => {
   const id = req.params.id;
+
+  // TODO UPDATE THE PRODUCT IF YOU ARE THE OWNER OR RETURN
 
   // Devuelvo JSON con producto borrado
   const deletedProduct = products.find((product) => product.id === id);

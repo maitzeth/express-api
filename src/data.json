@@ -2,16 +2,19 @@
   {
     "id": "1",
     "title": "Galletita",
-    "price": 1300
+    "price": 1300,
+    "owner": "natasha"
   },
   {
     "id": "2",
     "title": "Cafe",
-    "price": 10
+    "price": 10,
+    "owner": "natasha"
   },
   {
     "id": "3",
     "title": "Jugo",
-    "price": 200
+    "price": 200,
+    "owner": "natasha"
   }
 ]
