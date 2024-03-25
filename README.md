@@ -1,6 +1,10 @@
 # Introduction
 
-This is simply an Express API server featuring some basic routes, middleware, and more. I wanted to refresh my understanding of API and Backend technologies.
+This is simple Express API Rest featuring some of basic routes, middleware, and JWT.
+
+I just wanted to refresh my understanding of Backend Technologies after a long time away from it. 
+
+So I decided to create this project as an exercise for myself
 
 # Installation
 ```shell
