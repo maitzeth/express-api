@@ -2,10 +2,18 @@ import express, { Request, Response } from "express";
 import { MongooseError } from 'mongoose';
 import products from "@/data.json";
 import { Product, User } from '@/types';
-import { validateProductMiddleware, validateIdMiddleware } from './products.validate';
+import {
+  validateProductMiddleware,
+  validateIdMiddleware,
+} from './products.validate';
 import { logger } from '@/utils/logger';
 import { jwtAuth } from '@/api/libs/auth';
-import { createProduct, getProducts, getProductById } from './products.controller';
+import {
+  createProduct,
+  getProducts,
+  getProductById,
+  deleteProductById
+} from './products.controller';
 import { ERROR_MESSAGES } from '@/utils/constants';
 
 const productsRouter = express.Router();
@@ -68,7 +76,7 @@ productsRouter.get('/:id', validateIdMiddleware, withErrorHandling(async (req: R
 productsRouter.put('/:id', [jwtAuth, validateProductMiddleware], (req: Request, res: Response) => {
   const id = req.params.id;
   const { title, price, description } = req.body as Product;
-  const userRequest = req.user as Pick<User, 'id' | 'username'>;
+  const userRequest = req.user as Pick<User, 'username'>;
 
   // TODO UPDATE THE PRODUCT IF YOU ARE THE OWNER OR RETURN 
   const updatedProducts = products.map((product) => {
@@ -90,20 +98,24 @@ productsRouter.put('/:id', [jwtAuth, validateProductMiddleware], (req: Request, 
 });
 
 // Delete the product with the given ID
-productsRouter.delete('/:id', jwtAuth, (req: Request, res: Response) => {
+productsRouter.delete('/:id', jwtAuth, withErrorHandling( async(req: Request, res: Response) => {
   const id = req.params.id;
+  const userRequest = req.user as Pick<User, 'username'>;
+  
+  const product = await getProductById(id);
 
-  // TODO UPDATE THE PRODUCT IF YOU ARE THE OWNER OR RETURN
+  if (product) {
+    if (product.owner === userRequest.username) {
+      const response = await deleteProductById(id);
+      console.log(response);
 
-  // Devuelvo JSON con producto borrado
-  const deletedProduct = products.find((product) => product.id === id);
-
-  if (!deletedProduct) {
-    logger.info(`Product not found with id: ${id}`);
-    return res.status(404).json({ messages: [`Product not found with id: ${id}`] });
+      res.status(200).json(product);
+    } else {
+      res.status(403).json({ messages: [`You are not the owner of the product`] });
+    }
+  } else {
+    res.status(404).json({ messages: [`Product doesnt exists`] });
   }
-
-  res.status(200).json(deletedProduct);
-});
+}));
 
 export default productsRouter;
