@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
 import { v4 as uuidv4 } from 'uuid';
-import { AuthUser } from '@/types';
+import { AuthUser, User } from '@/types';
 import { logger } from '@/utils/logger';
 import { userAuthMiddleware, loginMiddleware } from './users.validate';
 import { users } from '@/database';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { getUsers } from './users.controller';
+import { getUsers, userExists, createUser } from './users.controller';
 import { withErrorHandling } from '@/utils';
 
 const usersRouter = express.Router();
@@ -19,35 +19,32 @@ usersRouter.get('/', withErrorHandling(async (req: Request, res: Response) => {
 }));
 
 // Create User
-usersRouter.post('/', userAuthMiddleware, (req: Request, res: Response) => {
+usersRouter.post('/', userAuthMiddleware, withErrorHandling(async (req: Request, res: Response) => {
   const newUser = req.body as AuthUser;
+  const { email, username, password } = newUser;
 
-  const userExists = users.some((user) => user.username === newUser.username || user.email === newUser.email);
+  const exists = await userExists(username, email);
 
-  if (userExists) {
+  if (exists) {
     // 409 Conflict
     logger.warn(`User already exists: ${JSON.stringify(newUser)}`);
-    return res.status(409).json({ messages: [`User already exists`] });
-  }
-
-  // Encrypt password
-  bcrypt.hash(newUser.password, 10, (err, hashedPw) => {
-    if (err) {
-      // Internal Server Error
-      logger.error(`Error hashing password: ${err}`);
-      return res.status(500).json({ messages: [`Error creating user`] });
-    }
-
-    const user = { ...newUser, password: hashedPw, id: uuidv4() };
-
-    users.push({
-      ...user,
+    res.status(409).json({ messages: [`User already exists`] });
+  } else {
+    // Encrypt password
+    bcrypt.hash(newUser.password, 10, async (err, hashedPw) => {
+      if (err) {
+        // Internal Server Error
+        logger.error(`Error hashing password: ${err}`);
+        return res.status(500).json({ messages: [`Error creating user`] });
+      }
+  
+      const response = await createUser(newUser, hashedPw);
+  
+      logger.info(`New user created: ${JSON.stringify(response)}`);
+      res.status(201).json(response);
     });
-
-    logger.info(`New user created: ${JSON.stringify(user)}`);
-    res.status(201).json(user);
-  });
-});
+  }
+}));
 
 usersRouter.post('/login', loginMiddleware, (req: Request, res: Response) => {
   const { username, password } = req.body;
