@@ -16,3 +16,7 @@ export function getProductById(id: string) {
 export function deleteProductById(id: string) {
   return ProductModel.findByIdAndDelete(id);
 };
+
+export function updateProductById(id: string, product: Product) {
+  return ProductModel.findByIdAndUpdate(id, product, { new: true });
+};

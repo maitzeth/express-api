@@ -12,7 +12,8 @@ import {
   createProduct,
   getProducts,
   getProductById,
-  deleteProductById
+  deleteProductById,
+  updateProductById
 } from './products.controller';
 import { ERROR_MESSAGES } from '@/utils/constants';
 
@@ -68,34 +69,41 @@ productsRouter.get('/:id', validateIdMiddleware, withErrorHandling(async (req: R
   if (product) {
     res.status(200).json(product);
   } else {
+    logger.error(`Product with id ${id} not found`);
     res.status(404).json({ messages: [`Product doesnt exists`] });
   }
 }, 'Error getting product by id', false));
 
 // Update the product with the given ID
-productsRouter.put('/:id', [jwtAuth, validateProductMiddleware], (req: Request, res: Response) => {
+productsRouter.put('/:id', [jwtAuth, validateProductMiddleware], withErrorHandling(async (req: Request, res: Response) => {
   const id = req.params.id;
   const { title, price, description } = req.body as Product;
   const userRequest = req.user as Pick<User, 'username'>;
 
-  // TODO UPDATE THE PRODUCT IF YOU ARE THE OWNER OR RETURN 
-  const updatedProducts = products.map((product) => {
-    if (product.id === id && product.owner === userRequest.username) {
-      return {
-        ...product,
+  const selectedProduct = await getProductById(id);
+
+  if (selectedProduct) {
+    if (selectedProduct.owner === userRequest.username) {
+
+      const newProduct = {
+        owner: userRequest.username,
         price,
         title,
         description,
       } satisfies Product;
+
+      const response = await updateProductById(id, newProduct);
+
+      logger.info(`Product updated: ${JSON.stringify(newProduct)} with id: ${id}`);
+      res.status(200).json(response);
+    } else {
+      res.status(403).json({ messages: [`You are not the owner of the product`] });
     }
-
-    return product;
-  });
-
-  logger.info(`Product updated: ${updatedProducts} with id: ${id}`);
-
-  res.status(200).json(updatedProducts);
-});
+  } else {
+    logger.error(`Product with id ${id} not found`);
+    res.status(404).json({ messages: [`Product doesnt exists`] });
+  }
+}));
 
 // Delete the product with the given ID
 productsRouter.delete('/:id', jwtAuth, withErrorHandling( async(req: Request, res: Response) => {
@@ -114,8 +122,9 @@ productsRouter.delete('/:id', jwtAuth, withErrorHandling( async(req: Request, re
       res.status(403).json({ messages: [`You are not the owner of the product`] });
     }
   } else {
+    logger.error(`Product with id ${id} not found`);
     res.status(404).json({ messages: [`Product doesnt exists`] });
   }
-}));
+}, 'Error deleting product by id', false));
 
 export default productsRouter;
