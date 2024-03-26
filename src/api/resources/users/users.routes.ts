@@ -30,62 +30,39 @@ usersRouter.post('/', [parseBodyToLowerCase, userAuthMiddleware], withErrorHandl
     res.status(409).json({ messages: [`User already exists`] });
   } else {
     // Encrypt password
-    bcrypt.hash(newUser.password, 10, async (err, hashedPw) => {
-      if (err) {
-        // Internal Server Error
-        logger.error(`Error hashing password: ${err}`);
-        return res.status(500).json({ messages: [`Error creating user`] });
-      }
-  
-      const response = await createUser(newUser, hashedPw);
-  
-      logger.info(`New user created: ${JSON.stringify(response)}`);
-      res.status(201).json(response);
-    });
+    const hashedPassword = await bcrypt.hash(newUser.password, 10);
+    const response = await createUser(newUser, hashedPassword);
+    
+    logger.info(`New user created: ${JSON.stringify(response)}`);
+    res.status(201).json(response);
   }
-}, 'Error creating user'));
+}));
 
 usersRouter.post('/login', [parseBodyToLowerCase, loginMiddleware], withErrorHandling(async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   const selectedUser = await getUser({ username });
 
-  console.log(selectedUser);
-  res.status(200).json([]);
-  
+  if (selectedUser) {
+    const correctPassword  = await bcrypt.compare(password, selectedUser.password)
+    
+    if (correctPassword) {
+      const token = jwt.sign(
+        { id: selectedUser.id },
+        process.env.JWT_SECRET as string,
+        { expiresIn: process.env.JWT_EXPIRE_TIME as string }
+      );
 
-  // const user = users.find((user) => user.username === username);
-
-  // if (!user) {
-  //   // 401 Unauthorized
-  //   logger.warn(`User not found: ${username}`);
-  //   return res.status(401).json({ messages: [`User not found`] });
-  // }
-
-  // const hashedPassword = user.password;
-  // bcrypt.compare(password, hashedPassword, (err, result) => {
-  //   if (err) {
-  //     // 500 Internal Server Error
-  //     logger.error(`Error comparing passwords: ${err}`);
-  //     return res.status(500).json({ messages: [`Error comparing passwords`] });
-  //   }
-
-  //   if (result) {
-  //     // 200 OK
-  //     const token = jwt.sign(
-  //       { id: user.id },
-  //       process.env.JWT_SECRET as string,
-  //       { expiresIn: process.env.JWT_EXPIRE_TIME as string }
-  //     );
-
-  //     logger.info(`User logged in: ${username}`);
-  //     return res.status(200).json({ token });
-  //   } else {
-  //     // 401 Unauthorized
-  //     logger.warn(`Invalid password for user: ${username}`);
-  //     return res.status(401).json({ messages: [`Invalid password`] });
-  //   }
-  // });
+      res.status(200).json({ token });
+    } else {
+      // 401 Unauthorized
+      logger.warn(`Invalid password for user: ${username}`);
+      res.status(401).json({ messages: [`Invalid password`] });
+    }
+  } else {
+    logger.warn(`User not found: ${username}`);
+    res.status(401).json({ messages: [`User not found`] });
+  }
 }, 'Error logging in user'));
 
 export default usersRouter;
