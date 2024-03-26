@@ -1,5 +1,5 @@
 import UserModel from './users.model';
-import { AuthUser } from '@/types';
+import { AuthUser, User } from '@/types';
 
 export function getUsers() {
   return UserModel.find();
@@ -15,3 +15,15 @@ export async function userExists(username: string, email: string) {
   const users = await UserModel.find().or([{ username }, { email }]);
   return users.length > 0;
 };
+
+export async function getUser({ id, username }: Partial<Pick<User, 'username' | 'id'>>) {
+  if (username) {
+    return UserModel.findOne({ username });
+  }
+
+  if (id) {
+    return UserModel.findById(id);
+  }
+
+  throw new Error('Invalid query');
+}

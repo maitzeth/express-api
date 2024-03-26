@@ -3,10 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthUser, User } from '@/types';
 import { logger } from '@/utils/logger';
 import { userAuthMiddleware, parseBodyToLowerCase, loginMiddleware } from './users.validate';
-import { users } from '@/database';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { getUsers, userExists, createUser } from './users.controller';
+import { getUsers, userExists, createUser, getUser } from './users.controller';
 import { withErrorHandling } from '@/utils';
 
 const usersRouter = express.Router();
@@ -46,41 +45,47 @@ usersRouter.post('/', [parseBodyToLowerCase, userAuthMiddleware], withErrorHandl
   }
 }, 'Error creating user'));
 
-usersRouter.post('/login', [parseBodyToLowerCase, loginMiddleware], (req: Request, res: Response) => {
+usersRouter.post('/login', [parseBodyToLowerCase, loginMiddleware], withErrorHandling(async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
-  const user = users.find((user) => user.username === username);
+  const selectedUser = await getUser({ username });
 
-  if (!user) {
-    // 401 Unauthorized
-    logger.warn(`User not found: ${username}`);
-    return res.status(401).json({ messages: [`User not found`] });
-  }
+  console.log(selectedUser);
+  res.status(200).json([]);
+  
 
-  const hashedPassword = user.password;
-  bcrypt.compare(password, hashedPassword, (err, result) => {
-    if (err) {
-      // 500 Internal Server Error
-      logger.error(`Error comparing passwords: ${err}`);
-      return res.status(500).json({ messages: [`Error comparing passwords`] });
-    }
+  // const user = users.find((user) => user.username === username);
 
-    if (result) {
-      // 200 OK
-      const token = jwt.sign(
-        { id: user.id },
-        process.env.JWT_SECRET as string,
-        { expiresIn: process.env.JWT_EXPIRE_TIME as string }
-      );
+  // if (!user) {
+  //   // 401 Unauthorized
+  //   logger.warn(`User not found: ${username}`);
+  //   return res.status(401).json({ messages: [`User not found`] });
+  // }
 
-      logger.info(`User logged in: ${username}`);
-      return res.status(200).json({ token });
-    } else {
-      // 401 Unauthorized
-      logger.warn(`Invalid password for user: ${username}`);
-      return res.status(401).json({ messages: [`Invalid password`] });
-    }
-  });
-});
+  // const hashedPassword = user.password;
+  // bcrypt.compare(password, hashedPassword, (err, result) => {
+  //   if (err) {
+  //     // 500 Internal Server Error
+  //     logger.error(`Error comparing passwords: ${err}`);
+  //     return res.status(500).json({ messages: [`Error comparing passwords`] });
+  //   }
+
+  //   if (result) {
+  //     // 200 OK
+  //     const token = jwt.sign(
+  //       { id: user.id },
+  //       process.env.JWT_SECRET as string,
+  //       { expiresIn: process.env.JWT_EXPIRE_TIME as string }
+  //     );
+
+  //     logger.info(`User logged in: ${username}`);
+  //     return res.status(200).json({ token });
+  //   } else {
+  //     // 401 Unauthorized
+  //     logger.warn(`Invalid password for user: ${username}`);
+  //     return res.status(401).json({ messages: [`Invalid password`] });
+  //   }
+  // });
+}, 'Error logging in user'));
 
 export default usersRouter;
