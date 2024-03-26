@@ -2,7 +2,7 @@ import UserModel from './users.model';
 import { AuthUser, User } from '@/types';
 
 export function getUsers() {
-  return UserModel.find();
+  return UserModel.find({});
 };
 
 export function createUser(user: AuthUser, hashedPassword: string) {

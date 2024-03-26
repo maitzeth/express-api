@@ -20,7 +20,7 @@ import mongoose from 'mongoose';
 dotenv.config();
 
 // MongoDB
-mongoose.connect(process.env.MONGO_URI as string);
+mongoose.connect(process.env.MONGO_URI as string, { dbName: process.env.DB_NAME });
 mongoose.connection.on('error', (error) => {
   logger.error(`[server]: MongoDB connection error: ${error}`);
   process.exit(1);

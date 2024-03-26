@@ -1,20 +1,18 @@
-import express, { Request, Response } from "express";
-import { v4 as uuidv4 } from 'uuid';
-import { AuthUser, User } from '@/types';
-import { logger } from '@/utils/logger';
-import { userAuthMiddleware, parseBodyToLowerCase, loginMiddleware } from './users.validate';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { getUsers, userExists, createUser, getUser } from './users.controller';
+import { AuthUser } from '@/types';
 import { withErrorHandling } from '@/utils';
+import { logger } from '@/utils/logger';
+import bcrypt from 'bcrypt';
+import express, { Request, Response } from "express";
+import jwt from 'jsonwebtoken';
+import { createUser, getUser, getUsers, userExists } from './users.controller';
+import { loginMiddleware, parseBodyToLowerCase, userAuthMiddleware } from './users.validate';
 
 const usersRouter = express.Router();
 
 // Get all users
 usersRouter.get('/', withErrorHandling(async (req: Request, res: Response) => {
-  const users = getUsers();
-  console.log(users);
-  res.status(200).json([]);
+  const users = await getUsers();
+  res.status(200).json(users);
 }));
 
 // Create User
