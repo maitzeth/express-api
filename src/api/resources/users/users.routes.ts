@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { v4 as uuidv4 } from 'uuid';
 import { AuthUser, User } from '@/types';
 import { logger } from '@/utils/logger';
-import { userAuthMiddleware, loginMiddleware } from './users.validate';
+import { userAuthMiddleware, parseBodyToLowerCase, loginMiddleware } from './users.validate';
 import { users } from '@/database';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -19,9 +19,9 @@ usersRouter.get('/', withErrorHandling(async (req: Request, res: Response) => {
 }));
 
 // Create User
-usersRouter.post('/', userAuthMiddleware, withErrorHandling(async (req: Request, res: Response) => {
+usersRouter.post('/', [parseBodyToLowerCase, userAuthMiddleware], withErrorHandling(async (req: Request, res: Response) => {
   const newUser = req.body as AuthUser;
-  const { email, username, password } = newUser;
+  const { email, username } = newUser;
 
   const exists = await userExists(username, email);
 
@@ -44,9 +44,9 @@ usersRouter.post('/', userAuthMiddleware, withErrorHandling(async (req: Request,
       res.status(201).json(response);
     });
   }
-}));
+}, 'Error creating user'));
 
-usersRouter.post('/login', loginMiddleware, (req: Request, res: Response) => {
+usersRouter.post('/login', [parseBodyToLowerCase, loginMiddleware], (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   const user = users.find((user) => user.username === username);

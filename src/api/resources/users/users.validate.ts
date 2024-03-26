@@ -61,3 +61,10 @@ export const loginMiddleware = async (req: Request, res: Response, next: NextFun
 
   return next();
 };
+
+export const parseBodyToLowerCase = (req: Request, res: Response, next: NextFunction) => {
+  req.body.username && (req.body.username = req.body.username.toLowerCase());
+  req.body.email && (req.body.email = req.body.email.toLowerCase());
+
+  return next();
+}
