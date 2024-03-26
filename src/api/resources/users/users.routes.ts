@@ -6,13 +6,17 @@ import { userAuthMiddleware, loginMiddleware } from './users.validate';
 import { users } from '@/database';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { getUsers } from './users.controller';
+import { withErrorHandling } from '@/utils';
 
 const usersRouter = express.Router();
 
 // Get all users
-usersRouter.get('/', (req: Request, res: Response) => {
-  res.json(users);
-});
+usersRouter.get('/', withErrorHandling(async (req: Request, res: Response) => {
+  const users = getUsers();
+  console.log(users);
+  res.status(200).json([]);
+}));
 
 // Create User
 usersRouter.post('/', userAuthMiddleware, (req: Request, res: Response) => {

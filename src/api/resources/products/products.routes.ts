@@ -1,39 +1,21 @@
-import express, { Request, Response } from "express";
-import { MongooseError } from 'mongoose';
-import products from "@/data.json";
-import { Product, User } from '@/types';
-import {
-  validateProductMiddleware,
-  validateIdMiddleware,
-} from './products.validate';
-import { logger } from '@/utils/logger';
 import { jwtAuth } from '@/api/libs/auth';
+import { Product, User } from '@/types';
+import { withErrorHandling } from '@/utils';
+import { logger } from '@/utils/logger';
+import express, { Request, Response } from "express";
 import {
   createProduct,
-  getProducts,
-  getProductById,
   deleteProductById,
+  getProductById,
+  getProducts,
   updateProductById
 } from './products.controller';
-import { ERROR_MESSAGES } from '@/utils/constants';
+import {
+  validateIdMiddleware,
+  validateProductMiddleware,
+} from './products.validate';
 
 const productsRouter = express.Router();
-
-const withErrorHandling = (
-  handler: (req: Request, res: Response) => Promise<void>,
-  fatalErrorMessage: string = ERROR_MESSAGES.default,
-  useDefaultError: boolean = true,
-) => {
-  return async (req: Request, res: Response) => {
-    try {
-      await handler(req, res);
-    } catch (err) {
-      const error = err as MongooseError;
-      logger.error(`${fatalErrorMessage}: ${error.message}`);
-      res.status(500).json({ messages: [useDefaultError ? fatalErrorMessage : error.message] });
-    }
-  };
-};
 
 // Get all products
 productsRouter.get('/', withErrorHandling(async (req: Request, res: Response) => {
