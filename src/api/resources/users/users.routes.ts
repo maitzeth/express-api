@@ -1,6 +1,6 @@
-import { AuthUser } from '@/types';
-import { withErrorHandling } from '@/utils';
-import { logger } from '@/utils/logger';
+import { AuthUser } from '@src/types';
+import { withErrorHandling } from '@src/utils';
+import { logger } from '@src/utils/logger';
 import bcrypt from 'bcrypt';
 import express, { Request, Response } from "express";
 import jwt from 'jsonwebtoken';
@@ -10,7 +10,7 @@ import { loginMiddleware, parseBodyToLowerCase, userAuthMiddleware } from './use
 const usersRouter = express.Router();
 
 // Get all users
-usersRouter.get('/', withErrorHandling(async (req: Request, res: Response) => {
+usersRouter.get('/', withErrorHandling(async (_req: Request, res: Response) => {
   const users = await getUsers();
   res.status(200).json(users);
 }));

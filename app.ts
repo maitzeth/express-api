@@ -1,18 +1,18 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
 import dotenv from "dotenv";
 import bodyParser from 'body-parser';
 
 // Resources
-import productsRouter from "@/api/resources/products/products.routes";
-import usersRouter from '@/api/resources/users/users.routes';
+import productsRouter from "@src/api/resources/products/products.routes";
+import usersRouter from '@src/api/resources/users/users.routes';
 
 // Logger
-import morganMiddleware from "@/middleware/morgan.middleware";
-import { logger } from '@/utils/logger';
+import morganMiddleware from "@src/middleware/morgan.middleware";
+import { logger } from '@src/utils/logger';
 
 // Passport Strategy
 import passport from 'passport';
-import { jwtStrategy } from '@/api/libs/auth';
+import { jwtStrategy } from '@src/api/libs/auth';
 
 // MongoDB
 import mongoose from 'mongoose';
@@ -26,7 +26,7 @@ mongoose.connection.on('error', (error) => {
   process.exit(1);
 });
 
-const app: Express = express();
+export const app: Express = express();
 const port = process.env.PORT || 3000;
 
 // ✅ Register the bodyParser middleware here
@@ -46,6 +46,6 @@ app.use(passport.initialize());
 app.use('/products', productsRouter);
 app.use('/users', usersRouter);
 
-app.listen(port, () => {
+export const server = app.listen(port, () => {
   logger.info(`[server]: Server is running at http://localhost:${port}`);
 });

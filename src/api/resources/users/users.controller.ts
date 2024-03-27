@@ -1,5 +1,5 @@
 import UserModel from './users.model';
-import { AuthUser, User } from '@/types';
+import { AuthUser, User } from '@src/types';
 
 export function getUsers() {
   return UserModel.find({});

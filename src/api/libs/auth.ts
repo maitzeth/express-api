@@ -1,5 +1,5 @@
-import { getUser } from '@/api/resources/users/users.controller';
-import { logger } from '@/utils/logger';
+import { getUser } from '@src/api/resources/users/users.controller';
+import { logger } from '@src/utils/logger';
 import dotenv from "dotenv";
 import { MongooseError } from 'mongoose';
 import passport from 'passport';

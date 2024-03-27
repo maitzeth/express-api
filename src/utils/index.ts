@@ -1,7 +1,7 @@
 
 import { ZodIssue } from 'zod';
-import { ERROR_MESSAGES } from '@/utils/constants';
-import { logger } from '@/utils/logger';
+import { ERROR_MESSAGES } from '@src/utils/constants';
+import { logger } from '@src/utils/logger';
 import { MongooseError } from 'mongoose';
 import { Request, Response } from "express";
 

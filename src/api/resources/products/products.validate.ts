@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { Product } from '@/types';
+import { Product } from '@src/types';
 
 import { z } from "zod";
-import { errorMessagesParser } from '@/utils';
+import { errorMessagesParser } from '@src/utils';
 
 // Blueprint
 const bluePrintProduct = z.object({
@@ -35,15 +35,15 @@ export const validateProductMiddleware = async (req: Request, res: Response, nex
     return res.status(400).json({ messages: formattedErrors });
   }
 
-  next();
+  return next();
 }
 
 export const validateIdMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.id;
 
-  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+  if (!id?.match(/^[0-9a-fA-F]{24}$/)) {
     return res.status(400).json({ messages: ["Invalid ID"] });
   }
 
-  next();
+  return next();
 };

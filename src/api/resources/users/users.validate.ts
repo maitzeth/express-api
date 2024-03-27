@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import { z } from "zod";
-import { errorMessagesParser } from '@/utils';
+import { errorMessagesParser } from '@src/utils';
 
 const alphanumericRegex = /^[a-zA-Z0-9]+$/;
 
@@ -62,7 +62,7 @@ export const loginMiddleware = async (req: Request, res: Response, next: NextFun
   return next();
 };
 
-export const parseBodyToLowerCase = (req: Request, res: Response, next: NextFunction) => {
+export const parseBodyToLowerCase = (req: Request, _res: Response, next: NextFunction) => {
   req.body.username && (req.body.username = req.body.username.toLowerCase());
   req.body.email && (req.body.email = req.body.email.toLowerCase());
 

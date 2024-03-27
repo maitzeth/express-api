@@ -1,7 +1,7 @@
-import { jwtAuth } from '@/api/libs/auth';
-import { Product, User } from '@/types';
-import { withErrorHandling } from '@/utils';
-import { logger } from '@/utils/logger';
+import { jwtAuth } from '@src/api/libs/auth';
+import { Product, User } from '@src/types';
+import { withErrorHandling } from '@src/utils';
+import { logger } from '@src/utils/logger';
 import express, { Request, Response } from "express";
 import {
   createProduct,
@@ -18,7 +18,7 @@ import {
 const productsRouter = express.Router();
 
 // Get all products
-productsRouter.get('/', withErrorHandling(async (req: Request, res: Response) => {
+productsRouter.get('/', withErrorHandling(async (_req: Request, res: Response) => {
   const products = await getProducts()
   res.status(200).json(products);
 }, 'Error getting products'));
@@ -96,8 +96,7 @@ productsRouter.delete('/:id', jwtAuth, withErrorHandling( async(req: Request, re
 
   if (product) {
     if (product.owner === userRequest.username) {
-      const response = await deleteProductById(id);
-      console.log(response);
+      await deleteProductById(id);
 
       res.status(200).json(product);
     } else {
