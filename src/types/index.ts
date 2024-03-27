@@ -12,8 +12,4 @@ export type User = {
   password: string;
 };
 
-export type AuthUser = {
-  username: string;
-  password: string;
-  email: string;
-};
+export type AuthUser = Pick<User, 'username' | 'password' | 'email'>;

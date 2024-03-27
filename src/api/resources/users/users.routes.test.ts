@@ -3,6 +3,8 @@ import request from 'supertest';
 import { app, server } from '../../../../app';
 import Users from '@src/api/resources/users/users.model';
 import { describe, expect, test } from '@jest/globals';
+import { AuthUser } from '@src/types';
+import bcrypt from 'bcrypt';
 
 let dummyUsers = [
   {
@@ -15,7 +17,12 @@ let dummyUsers = [
     email: 'user1@mail.com',
     password: "password123",
   }
-];
+] as AuthUser[];
+
+
+// async function userExistsAndAttributesAreCoorrect(user: AuthUser) {
+  
+// };
 
 
 describe('Users Routes', () => {
@@ -33,7 +40,7 @@ describe('Users Routes', () => {
         const response = await request(app).get('/users');
 
         expect(response.status).toBe(200);
-        expect(response.body).toEqual([]);
+        expect(response.body).toBeInstanceOf(Array);
         expect(response.body).toHaveLength(0);
     });
 
@@ -43,7 +50,32 @@ describe('Users Routes', () => {
       const response = await request(app).get('/users');
 
       expect(response.status).toBe(200);
+      expect(response.body).toBeInstanceOf(Array)
       expect(response.body).toHaveLength(2);
+    });
+  });
+
+  describe('POST /users', () => {
+    test('it should create a new user based on dummy user', async () => {
+      const response = await request(app)
+        .post('/users')
+        .send(dummyUsers[0]);
+
+      const user = response.body as AuthUser;
+
+      expect(response.status).toBe(201);
+      expect(user.email).toBe(dummyUsers[0]?.email);
+      expect(user.username).toBe(dummyUsers[0]?.username);
+
+      const userResult = await Users.find({ username: user.username });
+
+      expect(userResult).toBeInstanceOf(Array);
+      expect(userResult).toHaveLength(1);
+      expect(userResult[0]?.username).toBe(user.username);
+      expect(userResult[0]?.email).toBe(user.email);
+
+      const equalPassword = bcrypt.compareSync(dummyUsers[0]?.password as string, userResult[0]?.password as string);
+      expect(equalPassword).toBeTruthy();
     });
   });
 });
