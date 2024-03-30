@@ -1,10 +1,6 @@
 # Introduction
 
-This is simple Express API Rest featuring some of basic routes, middleware, and JWT.
-
-I just wanted to refresh my understanding of Backend Technologies after a long time away from it. 
-
-So I decided to create this project as an exercise for myself
+This is simple Express Rest API featuring some of basic routes, middleware, and JWT with some testing using Jest
 
 # Installation
 ```shell
