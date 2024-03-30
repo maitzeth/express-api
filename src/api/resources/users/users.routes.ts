@@ -21,7 +21,7 @@ usersRouter.post('/', [parseBodyToLowerCase, userAuthMiddleware], withErrorHandl
   const { email, username } = newUser;
 
   const exists = await userExists(username, email);
-
+  
   if (exists) {
     // 409 Conflict
     logger.warn(`User already exists: ${JSON.stringify(newUser)}`);

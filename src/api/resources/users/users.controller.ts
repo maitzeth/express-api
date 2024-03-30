@@ -12,7 +12,10 @@ export function createUser(user: AuthUser, hashedPassword: string) {
 
 export async function userExists(username: string, email: string) {
   // Modify to return true/false
-  const users = await UserModel.find().or([{ username }, { email }]);
+  const users = await UserModel.find({
+    $or: [{ username }, { email }],
+  });
+
   return users.length > 0;
 };
 
