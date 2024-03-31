@@ -20,3 +20,7 @@ export function deleteProductById(id: string | undefined) {
 export function updateProductById(id: string | undefined, product: Product) {
   return ProductModel.findByIdAndUpdate(id, product, { new: true });
 };
+
+export function saveImageUrl(id: string, imageUrl: string) {
+  return ProductModel.findByIdAndUpdate(id, { imageUrl }, { new: true });
+};

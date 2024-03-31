@@ -8,19 +8,18 @@ import {
   deleteProductById,
   getProductById,
   getProducts,
-  updateProductById
+  updateProductById,
+  saveImageUrl
 } from './products.controller';
 import {
   validateIdMiddleware,
   validateProductMiddleware,
   validateProductImage,
 } from './products.validate';
+import { saveImage } from '@src/api/data/images.controller';
+import { v4 } from 'uuid';
 
 const productsRouter = express.Router();
-
-// const validateId = (id: any) => {
-//   console.log(id);
-// }
 
 // Get all products
 productsRouter.get('/', withErrorHandling(async (_req: Request, res: Response) => {
@@ -114,9 +113,47 @@ productsRouter.delete('/:id', jwtAuth, withErrorHandling( async(req: Request, re
 }, 'Error deleting product by id', false));
 
 // Upload image
-productsRouter.put('/:id/image', [validateProductImage], withErrorHandling(async (_req: Request, res: Response) => {
-  // logger.info(`Image uploaded for product with id: ${req.body}`);
-  res.json({ url: 'blabla' });
+productsRouter.put('/:id/image', [jwtAuth, validateProductImage], withErrorHandling(async (req: Request, res: Response) => {
+  const productId = req.params.id as string;
+  const username = (req.user as User).username;
+  const userId = (req.user as User).id;
+
+  logger.info(`Image uploaded for product with id: ${productId} by user: ${username}`);
+
+  const product = await getProductById(productId);
+
+  if (product) {
+    // @ts-ignore
+    const fileName = `${v4()}.${req.fileExtension}`;
+    const s3FileData = {
+      fileName: fileName,
+      fileData: req.body,
+      productName: product.title.split(' ').join('-').toLowerCase().trim(),
+      userId: userId.toString(),
+    };
+
+    const s3SaveImageRes = await saveImage(s3FileData);
+
+    if (s3SaveImageRes) {
+      const url = `https://maitzeth-express.s3.amazonaws.com/images/${s3FileData.userId}/${s3FileData.productName}/${s3FileData.fileName}`;
+  
+      const saveImageResponse = await saveImageUrl(productId, url);
+      
+      if (saveImageResponse) {
+        logger.info(`Image uploaded for product with id: ${productId}`);
+        res.status(200).json(saveImageResponse);
+      } else {
+        logger.error(`Error saving image im DataBase for product with id: ${productId}`);
+        res.status(500).json({ messages: [`Error saving image`] });
+      }
+    } else {
+      logger.error(`Error saving image in S3 for product with id: ${productId}`);
+      res.status(500).json({ messages: [`Error saving image`] });
+    }
+  } else {
+    logger.error(`Product with id ${productId} not found`);
+    res.status(404).json({ messages: [`Product doesnt exists`] });
+  }
 }));
 
 export default productsRouter;
