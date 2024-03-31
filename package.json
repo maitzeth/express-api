@@ -7,7 +7,7 @@
     "build": "npx tsc",
     "start": "node dist/index.js",
     "dev": "nodemon --exec npx ts-node -r tsconfig-paths/register app.ts",
-    "test": "jest --watch --verbose"
+    "test": "jest --watch --verbose --runInBand"
   },
   "author": "maitzeth",
   "license": "ISC",
