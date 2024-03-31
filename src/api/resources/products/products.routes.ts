@@ -13,9 +13,14 @@ import {
 import {
   validateIdMiddleware,
   validateProductMiddleware,
+  validateProductImage,
 } from './products.validate';
 
 const productsRouter = express.Router();
+
+// const validateId = (id: any) => {
+//   console.log(id);
+// }
 
 // Get all products
 productsRouter.get('/', withErrorHandling(async (_req: Request, res: Response) => {
@@ -107,5 +112,11 @@ productsRouter.delete('/:id', jwtAuth, withErrorHandling( async(req: Request, re
     res.status(404).json({ messages: [`Product doesnt exists`] });
   }
 }, 'Error deleting product by id', false));
+
+// Upload image
+productsRouter.put('/:id/image', [validateProductImage], withErrorHandling(async (_req: Request, res: Response) => {
+  // logger.info(`Image uploaded for product with id: ${req.body}`);
+  res.json({ url: 'blabla' });
+}));
 
 export default productsRouter;
