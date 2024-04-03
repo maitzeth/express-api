@@ -1,6 +1,6 @@
 # Introduction
 
-This is simple Express Rest API featuring some of basic routes, middleware, and JWT with some testing using Jest
+Simple Express Rest API featuring some of basic routes, middleware, and JWT with some testing using Jest
 
 # Installation
 ```shell
